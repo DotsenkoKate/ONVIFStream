@@ -1,0 +1,95 @@
+{
+  "VideoEncoderConfigurationOptions": {
+    "QualityRange": {
+      "Min": 0,
+      "Max": 10
+    },
+    "JPEG": {
+      "ResolutionsAvailable": [
+        {
+          "Width": 640,
+          "Height": 360
+        },
+        {
+          "Width": 1280,
+          "Height": 720
+        },
+        {
+          "Width": 1920,
+          "Height": 1080
+        }
+      ],
+      "FrameRateRange": {
+        "Min": 1,
+        "Max": 30
+      },
+      "EncodingIntervalRange": {
+        "Min": 1,
+        "Max": 10
+      }
+    },
+    "MPEG4": {
+      "ResolutionsAvailable": [
+        {
+          "Width": 640,
+          "Height": 360
+        },
+        {
+          "Width": 1280,
+          "Height": 720
+        },
+        {
+          "Width": 1920,
+          "Height": 1080
+        }
+      ],
+      "GovLengthRange": {
+        "Min": 1,
+        "Max": 60
+      },
+      "FrameRateRange": {
+        "Min": 1,
+        "Max": 30
+      },
+      "EncodingIntervalRange": {
+        "Min": 1,
+        "Max": 4
+      }
+    },
+    "H264": {
+      "ResolutionsAvailable": [
+        {
+          "Width": 640,
+          "Height": 360
+        },
+        {
+          "Width": 1280,
+          "Height": 720
+        },
+        {
+          "Width": 1920,
+          "Height": 1080
+        }
+      ],
+      "GovLengthRange": {
+        "Min": 1,
+        "Max": 60
+      },
+      "FrameRateRange": {
+        "Min": 1,
+        "Max": 30
+      },
+      "EncodingIntervalRange": {
+        "Min": 1,
+        "Max": 4
+      },
+      "H264ProfilesSupported": [
+        "Baseline",
+        "Main",
+        "High"
+      ]
+    },
+    "GuaranteedFrameRateSupported": true,
+    "GuaranteedFrameRateSupportedSpecified": true
+  }
+}

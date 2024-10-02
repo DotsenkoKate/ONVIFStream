@@ -1,0 +1,58 @@
+﻿{
+  "Profiles": [
+    {
+      "Name": "mainStream",
+      "token": "Profile_1",
+      "VideoEncoderConfiguration": {
+        "Encoding": "JPEG",
+        "Resolution": {
+          "Width": 640,
+          "Height": 360
+        },
+        "RateControl": {
+          "FrameRateLimit": 30,
+          "EncodingInterval": 1
+        },
+        "Quality": 5
+      },
+      "VideoSourceConfiguration": {
+        "Name": "MainStreamConfig",
+        "token": "Config_1",
+        "SourceToken": "VideoSourceToken",
+        "Bounds": {
+          "x": 0,
+          "y": 0,
+          "width": 640,
+          "height": 360
+        }
+      }
+    },
+    {
+      "Name": "mainStream2",
+      "token": "Profile_2",
+      "VideoEncoderConfiguration": {
+        "Encoding": "H264",
+        "Resolution": {
+          "Width": 640,
+          "Height": 360
+        },
+        "RateControl": {
+          "FrameRateLimit": 30,
+          "EncodingInterval": 1
+        },
+        "Quality": 5
+      },
+      "VideoSourceConfiguration": {
+        "Name": "MainStreamConfig2",
+        "token": "Config_2",
+        "SourceToken": "VideoSourceToken2",
+        "Bounds": {
+          "x": 0,
+          "y": 0,
+          "width": 640,
+          "height": 360
+        }
+      }
+    }
+  ]
+}

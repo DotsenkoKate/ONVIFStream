@@ -1,8 +1,11 @@
 using CoreWCF;
 using Microsoft.AspNetCore.Hosting.Server;
-using Microsoft.Extensions.Logging;
-using SharpOnvifServer;
 using SharpOnvifServer.Media;
+using Newtonsoft.Json;
+using ONVIFStream.Config.Models;
+using SharpOnvifServer.DeviceMgmt;
+using IntRange = SharpOnvifServer.Media.IntRange;
+using VideoResolution = SharpOnvifServer.Media.VideoResolution;
 
 namespace ONVIFStream
 {
@@ -17,268 +20,273 @@ namespace ONVIFStream
         }
         public override GetProfilesResponse GetProfiles(GetProfilesRequest request)
         {
-            return new GetProfilesResponse()
+
+            GetProfilesResponse res = JsonConvert.DeserializeObject<GetProfilesResponse>(ReadJsonFromRelativePath());
+            var test = new GetProfilesResponse()
             {
-                Profiles = new Profile[]
-                {
-                    new Profile()
-                    {
-                        Name = "mainStream",
-                        token = "Profile_1",
-                        VideoEncoderConfiguration = new VideoEncoderConfiguration()
-                        {
-                            Encoding = VideoEncoding.JPEG,
-                            Resolution = new VideoResolution()
-                            {
-                                Width = 640,
-                                Height = 360
-                            },
-                            RateControl = new VideoRateControl()
-                            {
-                                FrameRateLimit = 30,
-                                EncodingInterval = 1
-                            },
-                            Quality = 5
-                        },
-                        VideoSourceConfiguration = new VideoSourceConfiguration()
-                        {
-                            token = "Config_1",
-                            SourceToken = "VideoSourceToken",
-                            Bounds = new IntRectangle()
-                            {
-                                height = 640,
-                                width = 360
-                            }
-                        }
-                    }
-                }
+                Profiles = res.Profiles
             };
+            return test;
         }
         public override Profile GetProfile(string ProfileToken)
         {
-            try
+
+            GetProfilesResponse res = JsonConvert.DeserializeObject<GetProfilesResponse>(ReadJsonFromRelativePath());
+            var profiles = new List<Profile> {};
+            foreach (var item in res.Profiles)
             {
-
-                if (string.IsNullOrEmpty(ProfileToken))
-                {
-                    throw new ArgumentException("ProfileToken is null or empty.");
-                }
-
-                var profiles = new List<Profile>
-                {
-                     new Profile()
-                     {
-                         Name = "mainStream",
-                         token = "Profile_1",
-                         VideoEncoderConfiguration = new VideoEncoderConfiguration()
-                         {
-                             Encoding = VideoEncoding.JPEG,
-                             Resolution = new VideoResolution()
-                             {
-                                 Width = 640,
-                                 Height = 360
-                             },
-                             RateControl = new VideoRateControl()
-                             {
-                                 FrameRateLimit = 30,
-                                 EncodingInterval = 1
-                             },
-                             Quality = 5
-                         },
-                         VideoSourceConfiguration = new VideoSourceConfiguration()
-                         {
-                             token = "Config_1",
-                             SourceToken = "VideoSourceToken",
-                             Bounds = new IntRectangle()
-                             {
-                                 height = 640,
-                                 width = 360
-                             }
-                         }
-                     },
-                };
-                var profile = profiles.FirstOrDefault(p => p.token == ProfileToken);
-
-                if (profile == null)
-                {
-                    throw new Exception($"Profile with token {ProfileToken} not found.");
-                }
-
-                return profile;
+                profiles.Add(item);
             }
-            catch (Exception ex)
-            {
-                throw new Exception($"Profile error! Info: {ex}"); ;
-            }
+            var profile = profiles.FirstOrDefault(p => p.token == ProfileToken);
+            return profile;
         }
+
         public override MediaUri GetSnapshotUri(string ProfileToken)
         {
-            Console.WriteLine("GetSnapshotUri");
 
-            return new MediaUri()
+            Components.GetProfilesResponse res = JsonConvert.DeserializeObject<Components.GetProfilesResponse>(ReadJsonFromRelativePath());
+
+            var profiles = new List<Components.Profile> { };
+            foreach (var item in res.Profiles)
+            {
+                profiles.Add(item);
+            }
+
+            var profile = profiles.FirstOrDefault(p => p.token == ProfileToken);
+            if (profile.VideoEncoderConfiguration.Encoding == "H264")
+            {
+                return new MediaUri()
+                {
+                    //Uri = $"{_server.GetHttpEndpoint()}/preview"
+                    Uri = "http://localhost:7238/cameras/snapshot/1/pars"
+                };
+            }
+            else if (profile.VideoEncoderConfiguration.Encoding == "JPEG")
+            {
+                return new MediaUri()
+                {
+                    //Uri = $"{_server.GetHttpEndpoint()}/preview"
+                    Uri = "http://localhost:7238/cameras/snapshot/1/pars"
+                };
+            }
+            else
+                return new MediaUri()
+                {
+                    //Uri = $"{_server.GetHttpEndpoint()}/preview"
+                    Uri = "http://localhost:7238/cameras/snapshot/1/pars"
+                };
+
+        }
+
+            /*return new MediaUri()
             {
                 //Uri = $"{_server.GetHttpEndpoint()}/preview"
                 Uri = "http://localhost:7238/cameras/snapshot/1/pars"
             };
-        }
+            }*/
+        
         public override MediaUri GetStreamUri(StreamSetup StreamSetup, string ProfileToken)
         {
+
+            Components.GetProfilesResponse res = JsonConvert.DeserializeObject<Components.GetProfilesResponse>(ReadJsonFromRelativePath());
             
-            return new MediaUri()
+            var profiles = new List<Components.Profile> { };
+            foreach (var item in res.Profiles)
+            {
+                profiles.Add(item);
+            }
+
+            var profile = profiles.FirstOrDefault(p => p.token == ProfileToken);
+            if (profile.VideoEncoderConfiguration.Encoding == "H264")
+            {
+                return new MediaUri()
+                {
+                    //Uri = $"{_server.GetHttpEndpoint()}/preview"
+                    Uri = "http://10.10.2.204:5000/api/v1/complex/cameras/1/rtsp"
+                };
+            }
+            else if (profile.VideoEncoderConfiguration.Encoding == "JPEG")
+            {
+                return new MediaUri()
+                {
+                    //Uri = $"{_server.GetHttpEndpoint()}/preview"
+                    Uri = "http://10.10.2.204:5000/api/v1/complex/cameras/1/mjpeg"
+                };
+            }
+            else 
+                return new MediaUri()
             {
                 //Uri = $"{_server.GetHttpEndpoint()}/preview"
-                Uri = "http://10.10.2.204:5000/api/v1/complex/cameras/1/mjpeg"
-
+                Uri = "http://10.10.2.204:5000/api/v1/complex/cameras/1/mp4"
             };
+
         }
         public override VideoSourceConfiguration GetVideoSourceConfiguration(string ConfigurationToken)
         {
-            try
-            {
-                if (string.IsNullOrEmpty(ConfigurationToken))
-                {
-                    throw new ArgumentException("ConfigurationToken is null or empty.");
-                }
 
-                // Конфигурация видеопотока
-                var videoSourceConfigurations = new List<VideoSourceConfiguration>
+            Components.GetProfilesResponse res = JsonConvert.DeserializeObject<Components.GetProfilesResponse>(ReadJsonFromRelativePath());
+
+            var videoSourceConfigurations = new List<VideoSourceConfiguration>();
+
+            // Перебираем каждый профиль из десериализованного ответа
+            foreach (var profile in res.Profiles)
+            {
+                videoSourceConfigurations.Add(new VideoSourceConfiguration()
                 {
-                    new VideoSourceConfiguration()
+                    token = profile.VideoSourceConfiguration.token,
+                    SourceToken = profile.VideoSourceConfiguration.SourceToken,
+                    Bounds = new IntRectangle()
                     {
-                        Name = "MainStreamConfig",
-                        token = "Config_1",
-                        SourceToken = "VideoSourceToken",
-                        Bounds = new IntRectangle()
-                        {
-                            x = 0,
-                            y = 0,
-                            width = 640,
-                            height = 360
-                        }
-                    },
-                };
-
-                // Поиск конфигурации по токену
-                var configuration = videoSourceConfigurations.FirstOrDefault(c => c.token == ConfigurationToken);
-
-                if (configuration == null)
-                {
-                    throw new Exception($"VideoSourceConfiguration with token {ConfigurationToken} not found.");
-                }
-                return configuration;
+                        width = profile.VideoSourceConfiguration.Bounds.width,
+                        height = profile.VideoSourceConfiguration.Bounds.height
+                    }
+                });
             }
-            catch (Exception ex)
-            {
-                throw new Exception($"VideoSourceConfiguration error. Info: {ex}");
-            }
+
+            // Поиск конфигурации по токену
+            var configuration = videoSourceConfigurations.FirstOrDefault(c => c.token == ConfigurationToken);
+            return configuration;
         }
         public override VideoEncoderConfigurationOptions GetVideoEncoderConfigurationOptions(string ConfigurationToken, string ProfileToken)
         {
+            /*string filePath = "C://Users//Docenko//source//repos//ONVIFStream//ONVIFStream//Config//VideoEncoderConfigurationOptions.json";
+            string json = File.ReadAllText(filePath);
+            VideoEncoderConfigurationOptions res = JsonConvert.DeserializeObject<VideoEncoderConfigurationOptions>(json);
+            return res;*/
 
-            // Создаем и возвращаем опции конфигурации кодировщика видео
-            return new VideoEncoderConfigurationOptions()
-            {
-                QualityRange = new IntRange() // Установите диапазон качества
-                {
-                    Min = 0,
-                    Max = 10 // Пример диапазона качества от 0 до 10
-                },
+              return new VideoEncoderConfigurationOptions()
+         {
 
-                JPEG = new JpegOptions() // Опции для JPEG
-                {
-                    ResolutionsAvailable = new VideoResolution[]
-                    {
-                        new VideoResolution() { Width = 640, Height = 360 },
-                        new VideoResolution() { Width = 1280, Height = 720 },
-                        new VideoResolution() { Width = 1920, Height = 1080 }
-                    },
-                    FrameRateRange = new IntRange() // Диапазон частоты кадров
-                    {
-                        Min = 1,
-                        Max = 30
-                    },
-                    EncodingIntervalRange = new IntRange() // Интервалы кодирования (например, ключевые кадры)
-                    {
-                        Min = 1,
-                        Max = 10
-                    }
-                },
-                MPEG4 = new Mpeg4Options()
-                {
-                    ResolutionsAvailable = new VideoResolution[]
-                            {
-                                new VideoResolution() { Width = 640, Height = 360 },
-                                new VideoResolution() { Width = 1280, Height = 720 },
-                                new VideoResolution() { Width = 1920, Height = 1080 }
-                            },
-                    GovLengthRange = new IntRange() // Диапазон длины GOV
-                    {
-                        Min = 1,
-                        Max = 60
-                    },
-                    FrameRateRange = new IntRange() // Диапазон частоты кадров
-                    {
-                        Min = 1,
-                        Max = 30
-                    },
-                    EncodingIntervalRange = new IntRange() // Интервал кодирования
-                    {
-                        Min = 1,
-                        Max = 4
-                    }
-                },
-                H264 = new H264Options()
-                {
-                    ResolutionsAvailable = new VideoResolution[]
-                    {
-                        new VideoResolution() { Width = 640, Height = 360 },
-                        new VideoResolution() { Width = 1280, Height = 720 },
-                        new VideoResolution() { Width = 1920, Height = 1080 }
-                    },
-                    GovLengthRange = new IntRange() // Диапазон длины GOV
-                    {
-                        Min = 1,
-                        Max = 60
-                    },
-                    FrameRateRange = new IntRange() // Диапазон частоты кадров
-                    {
-                        Min = 1,
-                        Max = 30
-                    },
-                    EncodingIntervalRange = new IntRange() // Интервал кодирования
-                    {
-                        Min = 1,
-                        Max = 4
-                    },
-                    H264ProfilesSupported = new H264Profile[]
-                    {
-                        H264Profile.Baseline,
-                        H264Profile.Main,
-                        H264Profile.High
-                    }
-                },
-                GuaranteedFrameRateSupported = true,
-                GuaranteedFrameRateSupportedSpecified = true,
-            };
+            QualityRange = new IntRange() // Установите диапазон качества
+             {
+                 Min = 0,
+                 Max = 10 // Пример диапазона качества от 0 до 10
+             },
+
+             JPEG = new JpegOptions() // Опции для JPEG
+             {
+                 ResolutionsAvailable = new VideoResolution[]
+                 {
+                     new VideoResolution() { Width = 640, Height = 360 },
+                     new VideoResolution() { Width = 1280, Height = 720 },
+                     new VideoResolution() { Width = 1920, Height = 1080 }
+                 },
+                 FrameRateRange = new IntRange() // Диапазон частоты кадров
+                 {
+                     Min = 1,
+                     Max = 30
+                 },
+                 EncodingIntervalRange = new IntRange() // Интервалы кодирования (например, ключевые кадры)
+                 {
+                     Min = 1,
+                     Max = 10
+                 }
+             },
+             MPEG4 = new Mpeg4Options()
+             {
+                 ResolutionsAvailable = new VideoResolution[]
+                         {
+                             new VideoResolution() { Width = 640, Height = 360 },
+                             new VideoResolution() { Width = 1280, Height = 720 },
+                             new VideoResolution() { Width = 1920, Height = 1080 }
+                         },
+                 GovLengthRange = new IntRange() // Диапазон длины GOV
+                 {
+                     Min = 1,
+                     Max = 60
+                 },
+                 FrameRateRange = new IntRange() // Диапазон частоты кадров
+                 {
+                     Min = 1,
+                     Max = 30
+                 },
+                 EncodingIntervalRange = new IntRange() // Интервал кодирования
+                 {
+                     Min = 1,
+                     Max = 4
+                 }
+             },
+             H264 = new H264Options()
+             {
+                 ResolutionsAvailable = new VideoResolution[]
+                 {
+                     new VideoResolution() { Width = 640, Height = 360 },
+                     new VideoResolution() { Width = 1280, Height = 720 },
+                     new VideoResolution() { Width = 1920, Height = 1080 }
+                 },
+                 GovLengthRange = new IntRange() // Диапазон длины GOV
+                 {
+                     Min = 1,
+                     Max = 60
+                 },
+                 FrameRateRange = new IntRange() // Диапазон частоты кадров
+                 {
+                     Min = 1,
+                     Max = 30
+                 },
+                 EncodingIntervalRange = new IntRange() // Интервал кодирования
+                 {
+                     Min = 1,
+                     Max = 4
+                 },
+                 H264ProfilesSupported = new H264Profile[]
+                 {
+                     H264Profile.Baseline,
+                     H264Profile.Main,
+                     H264Profile.High
+                 }
+             },
+             GuaranteedFrameRateSupported = true,
+             GuaranteedFrameRateSupportedSpecified = true,
+         };
+
 
         }
         public override GetVideoSourcesResponse GetVideoSources(GetVideoSourcesRequest request)
         {
+
+            Components.GetProfilesResponse res = JsonConvert.DeserializeObject<Components.GetProfilesResponse>(ReadJsonFromRelativePath());
+
+            var videoSources = new List<SharpOnvifServer.Media.VideoSource>();
+
+            // Перебираем каждый профиль из десериализованного ответа
+            foreach (var video in res.Profiles)
+            {
+                videoSources.Add(new SharpOnvifServer.Media.VideoSource()
+                {
+                    token = video.VideoSourceConfiguration.SourceToken,
+                    Resolution = new SharpOnvifServer.Media.VideoResolution()
+                    {
+                        Width = video.VideoSourceConfiguration.Bounds.width,
+                        Height = video.VideoSourceConfiguration.Bounds.height
+                    }
+                });
+            }
+
             return new GetVideoSourcesResponse()
             {
-                VideoSources = new VideoSource[]
-                {
-                    new VideoSource()
-                    {
-                        token = "VideoSourceToken",
-                        Resolution = new SharpOnvifServer.Media.VideoResolution()
-                        {
-                            Width = 640,
-                            Height = 360
-                        }
-                    }
-                }
+                VideoSources = videoSources.ToArray()
             };
         }
+        public string ReadJsonFromRelativePath()
+        {
+            // Получаем директорию, где находится исполняемый файл
+            string basePath = AppDomain.CurrentDomain.BaseDirectory;
+
+            // Путь к файлу относительно директории сборки
+            string relativeFilePath = Path.Combine(basePath, "Config", "Profiles.json");
+
+            // Проверяем, существует ли файл
+            if (!File.Exists(relativeFilePath))
+            {
+                throw new FileNotFoundException($"Файл не найден: {relativeFilePath}");
+            }
+
+            // Читаем содержимое файла JSON
+            string json = File.ReadAllText(relativeFilePath);
+
+            return json;
+        }
     }
+
 }
