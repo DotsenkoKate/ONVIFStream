@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Mvc;
-using ONVIFStream.Models;
 using SharpOnvifServer.Media;
 using System.Diagnostics;
 
