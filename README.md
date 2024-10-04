@@ -6,7 +6,7 @@
 Если не разворачивать это приложение отдельно, то нужно сделать следующие вещи:
 * подключить [Newtonsoft.Json](https://www.newtonsoft.com/json), [SharpOnvifServer](https://github.com/jimm98y/SharpOnvif), SharpOnvifServer.DeviceMgmt, SharpOnvifServer.Media;
 * перенести классы DeviceImpl, JSONReader, MediaImpl, UserRepository в свой проект + перенести всю папку Config;
-* добавить в Program.css сервисы:
+* добавить в Program.cs сервисы:
 ```C#
 builder.Services.AddServiceModelServices();
 builder.Services.AddServiceModelMetadata();
