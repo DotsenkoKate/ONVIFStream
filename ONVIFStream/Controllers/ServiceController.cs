@@ -19,10 +19,10 @@ namespace ONVIFStream.Controllers
             _logger = logger;
         }
 
-        [HttpGet("test")]
-        public ActionResult<Capabilities> Get()
+        [HttpGet]
+        public IActionResult Get()
         {            
-            return new Capabilities();
+            return Ok();
         }
     }
 }

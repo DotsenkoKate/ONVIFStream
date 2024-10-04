@@ -7,6 +7,7 @@ using SharpOnvifServer;
 var builder = WebApplication.CreateBuilder(args);
 
 // Добавляем Swagger генерацию
+#if DEBUG
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo
@@ -16,6 +17,7 @@ builder.Services.AddSwaggerGen(c =>
         Description = "ONVIF-compatible API for device and media management",
     });
 });
+#endif
 
 builder.Services.AddServiceModelServices();
 builder.Services.AddServiceModelMetadata();
@@ -30,6 +32,7 @@ builder.Services.AddSingleton((sp) => { return new ONVIFStream.MediaImpl(sp.GetS
 
 var app = builder.Build();
 
+#if DEBUG
 // Включаем Swagger и Swagger UI
 if (app.Environment.IsDevelopment())
 {
@@ -40,6 +43,7 @@ if (app.Environment.IsDevelopment())
         c.RoutePrefix = string.Empty; // Путь для доступа к Swagger UI
     });
 }
+#endif
 
 app.UseAuthentication();
 
