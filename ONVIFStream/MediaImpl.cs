@@ -2,10 +2,6 @@ using CoreWCF;
 using Microsoft.AspNetCore.Hosting.Server;
 using SharpOnvifServer.Media;
 using Newtonsoft.Json;
-using ONVIFStream.Config.Models;
-using SharpOnvifServer.DeviceMgmt;
-using IntRange = SharpOnvifServer.Media.IntRange;
-using VideoResolution = SharpOnvifServer.Media.VideoResolution;
 using Settings = ONVIFStream.Config.Models.Components.Settings;
 
 namespace ONVIFStream
@@ -24,6 +20,7 @@ namespace ONVIFStream
 
             if (_settings == null) throw new Exception("Json deserializing was failed.");
             else if (_settings.Profiles.Length == 0) throw new Exception("No profiles.");
+            else if (_settings.VideoEncoderConfigurationOptions is null) throw new Exception("VideoEncoderConfigurationOptions is null.");
         }
 
         public override GetProfilesResponse GetProfiles(GetProfilesRequest request)
@@ -106,105 +103,19 @@ namespace ONVIFStream
 
         public override VideoEncoderConfigurationOptions GetVideoEncoderConfigurationOptions(string ConfigurationToken, string ProfileToken)
         {
-            /*string filePath = "C://Users//Docenko//source//repos//ONVIFStream//ONVIFStream//Config//VideoEncoderConfigurationOptions.json";
-            string json = File.ReadAllText(filePath);
-            VideoEncoderConfigurationOptions res = JsonConvert.DeserializeObject<VideoEncoderConfigurationOptions>(json);
-            return res;*/
-            return new VideoEncoderConfigurationOptions()
-            {
-                QualityRange = new IntRange() // Установите диапазон качества
-                {
-                    Min = 0,
-                    Max = 10 // Пример диапазона качества от 0 до 10
-                },
-                JPEG = new JpegOptions() // Опции для JPEG
-                {
-                    ResolutionsAvailable = new VideoResolution[]
-                    {
-                        new VideoResolution() { Width = 640, Height = 360 },
-                        new VideoResolution() { Width = 1280, Height = 720 },
-                        new VideoResolution() { Width = 1920, Height = 1080 }
-                    },
-                    FrameRateRange = new IntRange() // Диапазон частоты кадров
-                    {
-                        Min = 1,
-                        Max = 30
-                    },
-                    EncodingIntervalRange = new IntRange() // Интервалы кодирования (например, ключевые кадры)
-                    {
-                        Min = 1,
-                        Max = 10
-                    }
-                },
-                MPEG4 = new Mpeg4Options()
-                {
-                    ResolutionsAvailable = new VideoResolution[]
-                    {
-                        new VideoResolution() { Width = 640, Height = 360 },
-                        new VideoResolution() { Width = 1280, Height = 720 },
-                        new VideoResolution() { Width = 1920, Height = 1080 }
-                    },
-                    GovLengthRange = new IntRange() // Диапазон длины GOV
-                    {
-                        Min = 1,
-                        Max = 60
-                    },
-                    FrameRateRange = new IntRange() // Диапазон частоты кадров
-                    {
-                        Min = 1,
-                        Max = 30
-                    },
-                    EncodingIntervalRange = new IntRange() // Интервал кодирования
-                    {
-                        Min = 1,
-                        Max = 4
-                    }
-                },
-                H264 = new H264Options()
-                {
-                    ResolutionsAvailable = new VideoResolution[]
-                    {
-                        new VideoResolution() { Width = 640, Height = 360 },
-                        new VideoResolution() { Width = 1280, Height = 720 },
-                        new VideoResolution() { Width = 1920, Height = 1080 }
-                    },
-                    GovLengthRange = new IntRange() // Диапазон длины GOV
-                    {
-                        Min = 1,
-                        Max = 60
-                    },
-                    FrameRateRange = new IntRange() // Диапазон частоты кадров
-                    {
-                        Min = 1,
-                        Max = 30
-                    },
-                    EncodingIntervalRange = new IntRange() // Интервал кодирования
-                    {
-                        Min = 1,
-                        Max = 4
-                    },
-                    H264ProfilesSupported =
-                    [
-                        H264Profile.Baseline,
-                        H264Profile.Main,
-                        H264Profile.High
-                    ]
-                },
-                GuaranteedFrameRateSupported = true,
-                GuaranteedFrameRateSupportedSpecified = true,
-            };
+            return _settings!.VideoEncoderConfigurationOptions;
         }
 
         public override GetVideoSourcesResponse GetVideoSources(GetVideoSourcesRequest request)
         {
-            var videoSources = new List<SharpOnvifServer.Media.VideoSource>();
+            var videoSources = new List<VideoSource>();
 
             foreach (var video in _settings!.Profiles)
             {
-                videoSources.Add(new SharpOnvifServer.Media.VideoSource()
+                videoSources.Add(new VideoSource()
                 {
                     token = video.VideoSourceConfiguration.SourceToken,
-                    Resolution = new SharpOnvifServer.Media.VideoResolution()
+                    Resolution = new VideoResolution()
                     {                        
                         Width = video.VideoSourceConfiguration.Bounds.width,
                         Height = video.VideoSourceConfiguration.Bounds.height
@@ -220,19 +131,15 @@ namespace ONVIFStream
 
         private string ReadSettingsFromJson()
         {
-            // Получаем директорию, где находится исполняемый файл
             string basePath = AppDomain.CurrentDomain.BaseDirectory;
 
-            // Путь к файлу относительно директории сборки
-            string relativeFilePath = Path.Combine(basePath, "Config", "settings.json");
+            string relativeFilePath = Path.Combine(basePath, "Config", "media_settings.json");
 
-            // Проверяем, существует ли файл
             if (!File.Exists(relativeFilePath))
             {
                 throw new FileNotFoundException($"Файл не найден: {relativeFilePath}");
             }
 
-            // Читаем содержимое файла JSON
             string json = File.ReadAllText(relativeFilePath);
 
             return json;

@@ -18,7 +18,6 @@ namespace ONVIFStream
 
         public override GetCapabilitiesResponse GetCapabilities(GetCapabilitiesRequest request)
         {
-            Console.WriteLine("GetCapabilities");
             return new GetCapabilitiesResponse()
             {
                 Capabilities = new Capabilities()
@@ -40,7 +39,7 @@ namespace ONVIFStream
                             {
                                 new OnvifVersion()
                                 {
-                                    Major = 16,
+                                    Major = 17,
                                     Minor = 12
                                 }
                             }
@@ -60,7 +59,7 @@ namespace ONVIFStream
                         XAddr = $"{_server.GetHttpEndpoint()}/onvif/media_service",
                         StreamingCapabilities = new RealTimeStreamingCapabilities()
                         {
-                            RTP_TCP = true
+                            RTP_TCP = true                         
                         },
                     },
                     Events = new EventCapabilities()
@@ -74,8 +73,6 @@ namespace ONVIFStream
 
         public override GetDeviceInformationResponse GetDeviceInformation(GetDeviceInformationRequest request)
         {
-            Console.WriteLine("GetDeviceInformation");
-
             return new GetDeviceInformationResponse()
             {
                 FirmwareVersion = "1.0",
@@ -85,10 +82,9 @@ namespace ONVIFStream
                 SerialNumber = "001"
             };
         }
-        public override DNSInformation GetDNS()
 
+        public override DNSInformation GetDNS()
         {
-            Console.WriteLine("GetDNS");
             return new DNSInformation()
             {
                 FromDHCP = false,
@@ -104,7 +100,6 @@ namespace ONVIFStream
 
         public override GetNetworkInterfacesResponse GetNetworkInterfaces(GetNetworkInterfacesRequest request)
         {
-            Console.WriteLine("GetNetworkInterfaces");
             return new GetNetworkInterfacesResponse()
             {
                 NetworkInterfaces = new NetworkInterface[]
@@ -123,8 +118,6 @@ namespace ONVIFStream
 
         public override GetScopesResponse GetScopes(GetScopesRequest request)
         {
-            Console.WriteLine("GetScopes");
-
             return new GetScopesResponse()
             {
                 Scopes = new Scope[]
@@ -143,6 +136,11 @@ namespace ONVIFStream
                     {
                         ScopeDef = ScopeDefinition.Fixed,
                         ScopeItem = "onvif://www.onvif.org/Profile/G"
+                    },
+                    new Scope()
+                    {
+                        ScopeDef = ScopeDefinition.Fixed,
+                        ScopeItem = "onvif://www.onvif.org/Profile/S"
                     }
                 }
             };
@@ -150,8 +148,6 @@ namespace ONVIFStream
 
         public override GetServicesResponse GetServices(GetServicesRequest request)
         {
-            Console.WriteLine("GetServices");
-
             return new GetServicesResponse()
             {
                 Service = new Service[]
@@ -179,10 +175,9 @@ namespace ONVIFStream
                 }
             };
         }
+
         public override SystemDateTime GetSystemDateAndTime()
         {
-            Console.WriteLine("GetSystemDateAndTime");
-
             var now = System.DateTime.UtcNow;
             return new SystemDateTime()
             {

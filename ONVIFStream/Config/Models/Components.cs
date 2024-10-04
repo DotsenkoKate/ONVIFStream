@@ -15,6 +15,7 @@ namespace ONVIFStream.Config.Models
         {
             public Links Links { get; set; }
             public Profile[] Profiles { get; set; }
+            public VideoEncoderConfigurationOptions VideoEncoderConfigurationOptions { get; set; }
         }
 
         //public class Profile
