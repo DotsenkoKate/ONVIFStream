@@ -1,4 +1,5 @@
-﻿using SharpOnvifServer.Media;
+﻿using SharpOnvifServer.DeviceMgmt;
+using SharpOnvifServer.Media;
 
 namespace ONVIFStream.Config.Models
 {
@@ -11,11 +12,16 @@ namespace ONVIFStream.Config.Models
             public string Snapshot { get; set; }
         }
 
-        public class Settings
+        public class MediaSettings
         {
             public Links Links { get; set; }
             public Profile[] Profiles { get; set; }
             public VideoEncoderConfigurationOptions VideoEncoderConfigurationOptions { get; set; }
+        }
+
+        public class DeviceSettings
+        {
+            public GetDeviceInformationResponse DeviceInformation { get; set; }
         }
 
         //public class Profile

@@ -2,7 +2,7 @@ using CoreWCF;
 using Microsoft.AspNetCore.Hosting.Server;
 using SharpOnvifServer.Media;
 using Newtonsoft.Json;
-using Settings = ONVIFStream.Config.Models.Components.Settings;
+using Settings = ONVIFStream.Config.Models.Components.MediaSettings;
 
 namespace ONVIFStream
 {
@@ -16,7 +16,7 @@ namespace ONVIFStream
         {
             _server = server;
 
-            _settings = JsonConvert.DeserializeObject<Settings>(ReadSettingsFromJson());
+            _settings = JsonConvert.DeserializeObject<Settings>(JSONReader.ReadJsonFile("media_settings.json"));
 
             if (_settings == null) throw new Exception("Json deserializing was failed.");
             else if (_settings.Profiles.Length == 0) throw new Exception("No profiles.");
@@ -25,6 +25,9 @@ namespace ONVIFStream
 
         public override GetProfilesResponse GetProfiles(GetProfilesRequest request)
         {
+#if DEBUG
+            Console.WriteLine("Media: GetProfiles");
+#endif
             var response = new GetProfilesResponse()
             {
                 Profiles = _settings!.Profiles
@@ -34,6 +37,9 @@ namespace ONVIFStream
 
         public override Profile GetProfile(string ProfileToken)
         {
+#if DEBUG
+            Console.WriteLine("Media: GetProfile");
+#endif
             var profiles = _settings!.Profiles.ToList();
 
             var profile = profiles.FirstOrDefault(p => p.token == ProfileToken);
@@ -45,11 +51,17 @@ namespace ONVIFStream
 
         public override MediaUri GetSnapshotUri(string ProfileToken)
         {
+#if DEBUG
+            Console.WriteLine("Media: GetSnapshotUri");
+#endif
             return new MediaUri() { Uri = _settings!.Links.Snapshot };
         }
         
         public override MediaUri GetStreamUri(StreamSetup StreamSetup, string ProfileToken)
         {
+#if DEBUG
+            Console.WriteLine("Media: GetStreamUri");
+#endif
             if (StreamSetup == null) throw new ArgumentNullException("Stream setup is null.");
 
             string link;
@@ -78,6 +90,9 @@ namespace ONVIFStream
 
         public override VideoSourceConfiguration GetVideoSourceConfiguration(string ConfigurationToken)
         {
+#if DEBUG
+            Console.WriteLine("Media: GetVideoSourceConfiguration");
+#endif
             var videoSourceConfigurations = new List<VideoSourceConfiguration>();
 
             foreach (var profile in _settings!.Profiles)
@@ -103,11 +118,17 @@ namespace ONVIFStream
 
         public override VideoEncoderConfigurationOptions GetVideoEncoderConfigurationOptions(string ConfigurationToken, string ProfileToken)
         {
+#if DEBUG
+            Console.WriteLine("Media: GetVideoEncoderConfigurationOptions");
+#endif
             return _settings!.VideoEncoderConfigurationOptions;
         }
 
         public override GetVideoSourcesResponse GetVideoSources(GetVideoSourcesRequest request)
         {
+#if DEBUG
+            Console.WriteLine("Media: GetVideoSources");
+#endif
             var videoSources = new List<VideoSource>();
 
             foreach (var video in _settings!.Profiles)
@@ -127,22 +148,6 @@ namespace ONVIFStream
             {
                 VideoSources = videoSources.ToArray()
             };
-        }
-
-        private string ReadSettingsFromJson()
-        {
-            string basePath = AppDomain.CurrentDomain.BaseDirectory;
-
-            string relativeFilePath = Path.Combine(basePath, "Config", "media_settings.json");
-
-            if (!File.Exists(relativeFilePath))
-            {
-                throw new FileNotFoundException($"Файл не найден: {relativeFilePath}");
-            }
-
-            string json = File.ReadAllText(relativeFilePath);
-
-            return json;
         }
     }
 

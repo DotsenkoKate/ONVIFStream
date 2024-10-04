@@ -1,8 +1,10 @@
 ﻿using CoreWCF;
 using Microsoft.AspNetCore.Hosting.Server;
+using Newtonsoft.Json;
 using SharpOnvifCommon;
 using SharpOnvifServer;
 using SharpOnvifServer.DeviceMgmt;
+using Settings = ONVIFStream.Config.Models.Components.DeviceSettings;
 
 namespace ONVIFStream
 {
@@ -10,14 +12,22 @@ namespace ONVIFStream
     public class DeviceImpl : DeviceBase
     {
         private readonly IServer _server;
+        private Settings? _settings;
 
         public DeviceImpl(IServer server)
         {
             _server = server;
+
+            _settings = _settings = JsonConvert.DeserializeObject<Settings>(JSONReader.ReadJsonFile("device_settings.json"));
+
+            if (_settings == null) throw new Exception("Can not deserialize device settings.");
         }
 
         public override GetCapabilitiesResponse GetCapabilities(GetCapabilitiesRequest request)
         {
+#if DEBUG
+            Console.WriteLine("GetCapabilities");
+#endif
             return new GetCapabilitiesResponse()
             {
                 Capabilities = new Capabilities()
@@ -59,32 +69,33 @@ namespace ONVIFStream
                         XAddr = $"{_server.GetHttpEndpoint()}/onvif/media_service",
                         StreamingCapabilities = new RealTimeStreamingCapabilities()
                         {
-                            RTP_TCP = true                         
+                            //???
+                            RTP_TCP = true,
+                            RTP_RTSP_TCP = true,
+                            RTPMulticast = true,
+                            RTP_RTSP_TCPSpecified = true,
+                            RTPMulticastSpecified = true,
+                            RTP_TCPSpecified = true
+                            //
                         },
-                    },
-                    Events = new EventCapabilities()
-                    {
-                        WSPullPointSupport = true,
-                        XAddr = $"{_server.GetHttpEndpoint()}/onvif/events_service"
-                    }
+                    }                    
                 }
             };
         }
 
         public override GetDeviceInformationResponse GetDeviceInformation(GetDeviceInformationRequest request)
         {
-            return new GetDeviceInformationResponse()
-            {
-                FirmwareVersion = "1.0",
-                HardwareId = "2qw13ed12",
-                Manufacturer = "Digital Region",
-                Model = "NanoCamerav1",
-                SerialNumber = "001"
-            };
+#if DEBUG
+            Console.WriteLine("GetDeviceInformation");
+#endif
+            return _settings!.DeviceInformation;
         }
 
         public override DNSInformation GetDNS()
         {
+#if DEBUG
+            Console.WriteLine("GetDNS");
+#endif
             return new DNSInformation()
             {
                 FromDHCP = false,
@@ -92,7 +103,7 @@ namespace ONVIFStream
                 {
                     new IPAddress()
                     {
-                        IPv4Address = "8.8.8.8"
+                        IPv4Address = "8.8.8.8" //?
                     }
                 }
             };
@@ -100,6 +111,9 @@ namespace ONVIFStream
 
         public override GetNetworkInterfacesResponse GetNetworkInterfaces(GetNetworkInterfacesRequest request)
         {
+#if DEBUG
+            Console.WriteLine("GetNetworkInterfaces");
+#endif
             return new GetNetworkInterfacesResponse()
             {
                 NetworkInterfaces = new NetworkInterface[]
@@ -110,14 +124,17 @@ namespace ONVIFStream
                         Info = new NetworkInterfaceInfo()
                         {
                             Name = "eth0"
-                        }
-                    },
+                        }                      
+                    }
                 }
             };
         }
 
         public override GetScopesResponse GetScopes(GetScopesRequest request)
         {
+#if DEBUG
+            Console.WriteLine("GetScopes");
+#endif
             return new GetScopesResponse()
             {
                 Scopes = new Scope[]
@@ -148,6 +165,9 @@ namespace ONVIFStream
 
         public override GetServicesResponse GetServices(GetServicesRequest request)
         {
+#if DEBUG
+            Console.WriteLine("GetServices");
+#endif
             return new GetServicesResponse()
             {
                 Service = new Service[]
@@ -178,6 +198,9 @@ namespace ONVIFStream
 
         public override SystemDateTime GetSystemDateAndTime()
         {
+#if DEBUG
+            Console.WriteLine("GetSystemDateAndTime");
+#endif
             var now = System.DateTime.UtcNow;
             return new SystemDateTime()
             {

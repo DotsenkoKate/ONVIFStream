@@ -20,26 +20,9 @@ namespace ONVIFStream.Controllers
         }
 
         [HttpGet("test")]
-        public ActionResult<VideoEncoderConfigurationOptions> Get()
-        {
-            // Получаем директорию, где находится исполняемый файл
-            string basePath = AppDomain.CurrentDomain.BaseDirectory;
-
-            // Путь к файлу относительно директории сборки
-            string relativeFilePath = Path.Combine(basePath, "Config", "VideoEncoderConfigurationOptions.json");
-
-            // Проверяем, существует ли файл
-            if (!System.IO.File.Exists(relativeFilePath))
-            {
-                throw new FileNotFoundException($"Файл не найден: {relativeFilePath}");
-            }
-
-            // Читаем содержимое файла JSON
-            string json = System.IO.File.ReadAllText(relativeFilePath);
-
-            VideoEncoderConfigurationOptions co = JsonConvert.DeserializeObject<VideoEncoderConfigurationOptions>(json);
-
-            return co;
+        public ActionResult<Capabilities> Get()
+        {            
+            return new Capabilities();
         }
     }
 }
